@@ -22,5 +22,5 @@ export AWS_SECRET_ACCESS_KEY=
 terraform refresh
 
 #configure aws creds through aws cli on terraform file under provider section
-shared_credentials_file = "/path/.aws/creds"
+shared_credentials_file = "/path/.aws/creds"        or set profile = "default"
 
