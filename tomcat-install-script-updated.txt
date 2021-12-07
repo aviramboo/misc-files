@@ -1,0 +1,69 @@
+#!/bin/bash
+#script to install java and tomcat on Centos 8.3 by user-1 on user-2
+#user-1 needs to be in sudoers or in group of admins in order to run the script
+####install dependencies
+sudo yum install java-1.8.0-openjdk-devel -y
+
+
+####Download and install Apache Tomcat
+wget http://www-eu.apache.org/dist/tomcat/tomcat-9/v9.0.44/bin/apache-tomcat-9.0.44.tar.gz -P /tmp/
+sudo mkdir /home/user-2/tomcat
+sudo tar -xvzf /tmp/apache-tomcat-9.0.44.tar.gz -C /home/user-2/tomcat
+sudo ln -s /home/user-2/tomcat/apache-tomcat-9.0.44 /home/user-2/tomcat/latest
+sudo chown -RH user-2:testgroup /home/user-2/tomcat/latest
+#sudo chown -RH user-2:testgroup /home/user-2/tomcat/
+sudo sh -c 'chmod +x /home/user-2/tomcat/latest/bin/*.sh'
+sudo chmod 755 -R /home/user-2
+
+####add tomcat configurations
+sudo cat << EOF > /tmp/tomcat.service
+
+[Unit]
+Description=Tomcat 9 servlet container
+After=network.target
+
+[Service]
+Type=forking
+
+User=user-2
+Group=testgroup
+
+Environment="JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk/"
+Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom -Djava.awt.headless=true"
+
+Environment="CATALINA_BASE=/home/user-2/tomcat/latest"
+Environment="CATALINA_HOME=/home/user-2/tomcat/latest"
+Environment="CATALINA_PID=/home/user-2/tomcat/latest/temp/tomcat.pid"
+Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+
+ExecStart=/home/user-2/tomcat/latest/bin/startup.sh
+ExecStop=/home/user-2/tomcat/latest/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+###  update systemctl and stat and enable service on startup
+sudo rsync -ravh /tmp/tomcat.service /etc/systemd/system/tomcat.service
+sudo systemctl daemon-reload
+sudo systemctl start tomcat && sudo systemctl enable tomcat
+
+
+#####mount NFS share
+sudo mkdir -p /home/user-2/tomcat/website
+sudo mount 10.0.0.20:/home/user-1/data /home/user-2/tomcat/website
+#sudo chown -R user-2:testgroup /home/user-2/tomcat/website
+#####add custom html file
+sudo cat << EOF > /tmp/index.html
+<html>
+ <head>
+ </head>
+ <body>
+   <h1>Hello World<h1>
+ </body>
+</html>
+EOF
+
+#### sync app and website directories
+rsync -ravh /tmp/index.html /home/user-2/tomcat/website/index.html
+sudo rsync -ravh /tmp/index.html /home/user-2/tomcat/latest/webapps/ROOT

@@ -1,0 +1,126 @@
+lsmod           #show modules
+lsmod -r <module name>       #remove module
+modprobe <module name>       #loading module
+systemd-analyze              #show services boot time
+systemd-analyze -blame       # -"- but in descent oder of time to start
+systemctl list-units         #show all units running
+systemctl list-units |grep httpd     #search if httpd is loaded
+systemctl enable httpd.service       #enable httpd on boot
+systemctl start httpd.service        #stat httpd service
+
+
+LVM:
+
+vgcreate <lvm_name> /dev/sdb2 /dev/sdb3             #creates volume group
+lvcreate -L 250G -n <LV name> <vg-name>             #creates ogical volume from VG in size of 250G
+lvscan                                              #display volumes
+                                                    #increase LV size
+
+
+
+
+ldd <module>                                       #shows module or binary  dependencies
+
+
+
+files operations:
+
+cut -d: -f1 /file                                  #print a single column of text
+expand file                                        #convert tabs to spaces
+unexpand file                                      # convert spaces to tabs
+fmt -w 60 file                                     # format line width
+pr -d -l 20 file                                   # format line spacing
+nl file                                            #shows file with line numbers
+split -2 file                                      #split file into files of 2 lines
+cat file | tr "a-z" "A-Z"                          #print file but switch lower cases to higher case
+sed s/dog/"horse"/                                 #switch dog with horse- ad g at end to catch all words in the file
+sed /dog/d                                         #delete the dog word from file
+uniq -u file                                       #will print without words duplications.
+cpio  ?????
+dd if=/dev/sdb of=/media/drive                     #copy all sdb drive to another location with same format
+
+
+
+
+screen                                             #option of multiple terminals in one window
+screen -x                                          #attach to running sceen
+screen -ls                                         #shows screens windows
+ctrl-a c                                           #create new window
+ctrl-a S                                           #split screens (horizontally)
+ctrl-a d                                           #detach from screen session
+ctrl-a tab                                         #jump to next screen
+ctrl-a \                                           #exit screen and programs
+
+nohup cp file file2 &                              #run this to make sure even if exiting window the screen will ontinue running.
+fg 1                                               #brings job to the background
+bg 1/ctrl-z                                        #interupt and send to background
+
+
+nice -10 <command>                                 #set higher priority of the process, adding - to the -10 will switch it to lower priority, default is 0.
+renice -10 -p <process>                            #changing priority of existing process
+
+
+regular expresion:
+
+egrep                                             #do not require escape charcter as grep
+fgrep                                             #filter and show special characters as is
+cat index.html | sed 's/<[^>]*>//g                                 #removes  all tags of html
+grep -r pattern file                              #filter in directory recursively 
+
+
+
+
+File system:
+dumpe2fs /dev/sda1 >dump                          #dump all volume information and parameters.
+fsck
+e2fsck
+debugfs /dev/sda1  
+chmod t directory                                #apply sticky bit
+quatacheck -avmug                                #check all disks for quata's 
+quotaon -av                                      #activate quota on all with verbose
+repquota -av                                     #show quota's statistics
+edquota -u user                                  #configure quota for user, us -g for group 
+
+
+
+bash:
+function name() {ls -l $1; }                    #function to list files in directory according to user input, then run 'name /var' to list all files under /var
+unset -f name                                   #deletes name function
+
+#add swap to machine with no swap spaces
+fallocate -l 2G /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab         #configure to swap mount on boot
+
+
+ 
+                           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+screen -                    
+screen -d
+
+
+
+
+
+ 
+
+
+
+

@@ -1,0 +1,21 @@
+#install aws cli
+#
+#as root
+dnf install python3-pip
+
+#as regular user
+pip3 install awscli --upgrade --user
+
+aws --version
+
+aws configure
+
+
+#login to ecr
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 724083714125.dkr.ecr.us-east-1.amazonaws.com
+
+
+aws ecr describe-repositories                    #describe repositories
+aws ecr describe-images --repository-name amazonlinux     #describe images from amazonlinux repositories
+docker pull aws_account_id.dkr.ecr.us-west-2.amazonaws.com/amazonlinux:latest          #pull from ECR to docker.
+
