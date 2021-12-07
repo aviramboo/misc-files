@@ -1,0 +1,75 @@
+kubectl create                 #create resources like pods/services/etc...
+kubectl delete
+kubectl get                    #to get list of resources of given type (for example kubectl get pods, add --short-labels to add label to output)
+kubectl apply -f file.yaml     #update running pod with the file changes
+kubectl describe               #to print details info about resource/s
+kubectl logs                   #print container logs
+kubectl describe nodes | grep -i address -A 1 #get private ip of nodes
+kubectl scale -n <name_space> <deployment name> <pod> --replicas=5         #sets replica of 5 pods
+kubectl rollout -n deployments deployment app-tier
+kubectl rollout -n deployments undo deployment app-tier
+kubectl completion --help                               #display options for autocomplition 
+kubectl port-forward <container> 8080:80               #forward container port 8080 to host port 80
+kubectl expose deployment nginx --type NodePort --port 80  #create service nginx to expose container port 80 to host random port
+kubectl describe <object> -o yaml                          #describe obkect as yaml file
+
+
+source <(kubectl completion bash)                                  #adding autocompletion
+echo "source <(kubectl completion bash)" >> ~/.bash_profile              #adding autocompletion permanently
+kubectl run nginx --image=nginx --port=80 --replias=2 --expose --dry-run -o yaml     #drops commands to yaml format while running on dry
+kubectl explain pod                                                                   #show all options for pods.
+kubectl taint -h                                                                       #relevant to repeling node
+kubectl toleration -h                                                                  #relevant to repeling pode
+
+
+
+#to grant user the kubectl
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+#run temp container to connect to DB
+kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -ppassword
+
+#create configuration of app as config map
+kubectl create configmap nginx-frontend-conf --from-file nginx/frontend.conf
+
+#configure tld as secret
+kubectl create secret generic tls-certs --from-file tls/
+
+
+
+#run temp container to run some shell command and output it when container removed
+ kubectl run --image=busybox bbox1 --restart=Never -it --rm -- /bin/sh -c "wget -qO- http://10.101.104.200/"
+ 
+ #deploy metric server to collect resource usage from pods in order to be able to limit pod resource or scale up/down
+kubctl apply -f metric-server/ -n <namespace>
+
+#Enable autocompletion
+source <(kubetl completion bash)
+echo "source <(kubetl completion bash)" >> ~/.bash_profile
+
+#show short names of api resources of kubectl
+kubectl api-resources |more
+
+#configure taint   (conditions for enable/disable scheduling pods on master node.
+kubectl taint -help
+
+
+#Enable Ingress controller in MiniKube
+minikube addons enable ingress
+
+
+
+
+
+
+
+
+
+
+
+
+
+

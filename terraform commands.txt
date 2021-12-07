@@ -1,0 +1,16 @@
+terraform console
+
+terraform init
+
+terraform workspace new aws-lab
+
+terraform plan -out=aws-lab.tfplan
+
+terraform workspace list
+
+terraform workspace new aws-lab
+
+terraform apply
+
+
+terraform init -backend-config="access_key=<your access key>" -backend-config="secret_key=<your secret key>"

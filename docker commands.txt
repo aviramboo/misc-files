@@ -1,0 +1,81 @@
+#Images
+docker images                             #show local images
+docker inspect                            #shows more details on images
+docker build -t test  -f /path-to-docker-file      #build image from docker file, remove . and path and will deploy the local Dockerfile file and adding Repo Tag of "test" to image
+docker rmi <image_ID>                     #deletes specific image
+docker commit <container-id> <Name>                         #create image from changed container.
+docker commit --change='CMD ["python". "c" ."python function"]' <container-ID> <Name>    #create as above but changing ubuntu default bash to python
+docker build -t <image-name>                                                             #build image with only repo name   add :<tag> to the <repo name> to add tag.
+docker tag repo:latest trepo:v1                                                          #change taging of image
+docker tag name:latest docker-user/name:lates                                            #add user to tag in order to be able to push to docker hub
+docker logs <container>                                                                  #show logs about container
+docker exec -it web-server /bin/bash                                                     #run command on running container- here the example shows the container bash terminal (another example:  docker exec -it web-server /bin/bash)docker exec -it web-server /bin/bash
+docker search "microsoft .NET"                                                           #search repo for images to fit the search words
+
+CTRL+P and CTRL-Q            #exit running container without stopping it
+
+
+
+
+
+
+
+#containers
+docker run -it ubuntu /bin/bash           #running ubuntu container and gives the bash terminal.
+docker run -d <container>                 #running container in detach mode
+docker run -d -P <container>              #running container and expose app port to dynamic port.
+docker run -d -p 3000:8080 <container>    # running container with exposing container port 8080 on host port 3000
+docker ps                                 #show running containers
+docker ps -a                              #show previously running containers.
+docker start <container_name>             #starting container from previous running container in the background
+docker attach <container_name>            #attach container bash terminal.
+docker container prune                    #removes all traces of previous running containers
+docker rm <container_name>                #remove specific container
+docker inspect <container>                #showing all info on container
+
+
+
+#port mapping
+docker run -d --mount type=bind,src="/docker-mount",dst=/logs <container>      #running container with local host mount
+docker run -d --mount type=volume,src="logs",dst=/logs <container>      #running container with creation of container volume
+docker run -d --mount type=tmpfs,dst=/logs <container>      #running container with temporary files system
+docker volume ls                                                         #showing containers volumes
+docker volume inspect <volume>                                            #showing all info on container's volume
+
+
+
+#storage
+docker 
+
+
+#networking
+docker network ls                        #show docker networking
+
+
+
+
+#docker-compose
+
+#docker swamm mode
+
+docker swarm init                       #activate swarm mode in single mode
+docker swarm init --advertise-addr <ip>
+docker swarm leave --force              #removing node from swarm
+docker swarm join <string from manager> #add worker to cluster
+docker node --help
+docker node promote <docker2>           #making docker 2 machine as manager   #demote removes as manager
+docker node update --help
+docker node update --availability drain vm1    #placing vm1 in drain mode    (active pause or drain options)
+docker node update --label-add zone=1 vm1        #adding label to vm1
+docker node inspect
+docker service --help
+docker service create --constraint=node.role=manager --mode=global --publish mode=ingress,target=8080,published=8080 --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --name >service name> dockersamples/visualizer   #install cluster view srervice
+docker service create --constraint node.labels.zone!=1 --replicas 2 --placement-pref 'spread=node.labels.zone' -e NODE_NAME='{{.Node.Hostname}}' -p 80:80 --name nodenamer nodenamer:1.0.0
+docker service scale nodenamer=6            #changing nodenamer replica to 6
+docker service update --image <image> <name of service>      #updating service with image
+
+
+#docker stacks
+docker stack --help
+
+

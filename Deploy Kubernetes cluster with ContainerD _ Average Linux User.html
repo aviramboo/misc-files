@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Start Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-102843235-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-102843235-1');
+</script>
+<!-- End Google Analytics -->
+
+
+
+
+  <!-- Start Google AdSense -->
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-7417275129097757",
+          enable_page_level_ads: true
+     });
+</script>
+<!-- End Google AdSense --> 
+
+
+
+<!-- Begin favicon from realfavicongenerator.net -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5b67d5">
+<meta name="msapplication-TileColor" content="#603cba">
+<meta name="theme-color" content="#ffffff">
+<!-- End favicon from realfavicongenerator.net -->
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Deploy Kubernetes cluster with ContainerD | Average Linux User</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Deploy Kubernetes cluster with ContainerD" />
+<meta name="author" content="alu" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Learn how to deploy a Kubernetes cluster with ContainerD instead of Docker. Install Kubernetes, configure ContainerD, deploy an app, and test scaling and self-healing." />
+<meta property="og:description" content="Learn how to deploy a Kubernetes cluster with ContainerD instead of Docker. Install Kubernetes, configure ContainerD, deploy an app, and test scaling and self-healing." />
+<link rel="canonical" href="https://averagelinuxuser.com/kubernetes_containerd/" />
+<meta property="og:url" content="https://averagelinuxuser.com/kubernetes_containerd/" />
+<meta property="og:site_name" content="Average Linux User" />
+<meta property="og:image" content="https://averagelinuxuser.com/assets/images/posts/2021-03-27-kubernetes_containerd/kubernetes_containerd_thumbnail.jpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:image" content="https://averagelinuxuser.com/assets/images/posts/2021-03-27-kubernetes_containerd/kubernetes_containerd_thumbnail.jpeg" />
+<meta property="twitter:title" content="Deploy Kubernetes cluster with ContainerD" />
+<meta name="twitter:site" content="@AVGLinuxUser" />
+<meta name="twitter:creator" content="@alu" />
+<meta property="article:publisher" content="https://www.facebook.com/AverageLinuxUser" />
+<meta name="yandex-verification" content="2bd852004b45ebd8" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://averagelinuxuser.com/assets/images/logo.png"},"name":"alu"},"url":"https://averagelinuxuser.com/kubernetes_containerd/","image":"https://averagelinuxuser.com/assets/images/posts/2021-03-27-kubernetes_containerd/kubernetes_containerd_thumbnail.jpeg","headline":"Deploy Kubernetes cluster with ContainerD","dateModified":"2021-03-27T00:00:00+00:00","datePublished":"2021-03-27T00:00:00+00:00","author":{"@type":"Person","name":"alu"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://averagelinuxuser.com/kubernetes_containerd/"},"description":"Learn how to deploy a Kubernetes cluster with ContainerD instead of Docker. Install Kubernetes, configure ContainerD, deploy an app, and test scaling and self-healing.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    
+<link href="/assets/css/screen.css" rel="stylesheet">
+
+<link href="/assets/css/main.css" rel="stylesheet">
+
+<script src="/assets/js/jquery.min.js"></script>
+
+<!-- Start Buy me a coffee widget -->
+<script data-name="BMC-Widget" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="avglinuxuser" data-description="Support me by buying me a coffee!" data-message="Thank you for visiting. You can now buy me a coffee!" data-color="#FF813F" data-position="left" data-x_margin="18" data-y_margin="18"></script>
+<!-- End Buy me a coffee widget -->
+
+<!-- Begin Cookie consent -->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+<script>
+window.addEventListener("load", function(){
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#000"
+    },
+    "button": {
+      "background": "#f1d600"
+    }
+  },
+  "theme": "classic",
+  "position": "bottom-right",
+  "content": {
+    "href": "https://averagelinuxuser.com/privacy-policy/"
+  }
+  })
+});
+</script>
+<!-- End Cookie consent -->
+
+<link type="application/atom+xml" rel="alternate" href="https://averagelinuxuser.com/feed.xml" title="Average Linux User" />
+
+</head>
+
+
+
+<body class="layout-post">
+	<!-- defer loading of font and font awesome -->
+	<noscript id="deferred-styles">
+		<link href="https://fonts.googleapis.com/css?family=Righteous%7CMerriweather:300,300i,400,400i,700,700i" rel="stylesheet">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+	</noscript>
+
+
+<!-- Begin Menu Navigation
+================================================== -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top mediumnavigation nav-down">
+
+    <div class="container pr-0">
+
+    <!-- Begin Logo -->
+    <a class="navbar-brand" href="/">
+    <img src="/assets/images/logo.png" alt="Average Linux User">
+    <p class="sitetitle">Average Linux User</p>
+    </a>
+    <!-- End Logo -->
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMediumish" aria-controls="navbarMediumish" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMediumish">
+
+        <!-- Begin Menu -->
+
+            <menu class="navbar-nav ml-auto">
+
+                <li class="nav-item dropdown menu-dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Distros</a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/categories#Ubuntu">Ubuntu</a>
+                    <a class="dropdown-item" href="/categories#Linux-Mint">Linux Mint</a>
+                    <a class="dropdown-item" href="/categories#Debian">Debian</a>
+                    <a class="dropdown-item" href="/categories#Arch-Linux">Arch Linux</a>
+                    <a class="dropdown-item" href="/categories#Manjaro">Manjaro</a>
+                    <a class="dropdown-item" href="/categories#KDE-Neon">KDE Neon</a>
+                    <a class="dropdown-item" href="/categories#elementaryOS">elementary OS</a>
+                    <a class="dropdown-item" href="/categories#Solus">Solus</a>
+                  </div>
+                </li>
+      
+                <li class="nav-item dropdown menu-dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Desktops</a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/categories#GNOME">GNOME</a>
+                    <a class="dropdown-item" href="/categories#Plasma-5">Plasma 5</a>
+                    <a class="dropdown-item" href="/categories#Xfce">XFCE</a>
+                    <a class="dropdown-item" href="/categories#Cinnamon">Cinnamon</a>
+                  </div>
+                </li>
+      
+                <li class="nav-item dropdown menu-dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Hardware</a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="https://averagelinuxuser.com/linux_pc_assembly/">Desktops</a>
+                    <a class="dropdown-item" target="_blank" rel="nofollow" href="https://starlabs.systems/?rfsn=4728988.4df7ed">Laptops <i class="fas fa-external-link-alt"></i></a>
+                    <a class="dropdown-item" target="_blank" rel="nofollow" href="https://www.amazon.com/shop/averagelinuxuser">Amazon List <i class="fab fa-amazon"></i></a>
+                  </div>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" target="_blank" rel="nofollow" href="https://www.youtube.com/AverageLinuxUser?sub_confirmation=1"><i class="fab fa-youtube"></i> YouTube</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" target="_blank" rel="nofollow" href="https://lbry.tv/$/invite/@AVGLinux:2"><i class="fas fa-book"></i> LBRY.tv</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/about">About</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/contact">Contact</a>
+                </li>
+
+                <li class="search-all">
+                  <div id="search-container">
+                  <form class="input-group">
+                    <input id="search" name="main_input" class="form-control text-small launch-modal-search" placeholder="Type to search..." type="text">
+                  </form>
+                  </div>
+                  <div class="search-results">
+                    <ul id="results" class="search-results-ul card shadow border border-top-0"></ul>
+                  </div>
+                </li>
+
+            </menu>
+
+        <!-- End Menu -->
+
+    </div>
+
+    </div>
+</nav>
+<!-- End Navigation
+================================================== -->
+
+<div class="site-content">
+
+<div class="container">
+
+
+
+<!-- Content
+================================================== -->
+<div class="main-content">
+    <!-- Begin Article
+================================================== -->
+<div class="container">
+    <div class="row">
+
+        <!-- Post Share -->
+        <div class="col-md-2 pl-0">
+            <div class="share sticky-top sticky-top-offset">
+    <p>
+        Share
+    </p>
+    <ul>
+        <li class="ml-1 mr-1">
+            <a target="_blank" href="https://twitter.com/intent/tweet?text=Deploy+Kubernetes+cluster+with+ContainerD&url=https://averagelinuxuser.com/kubernetes_containerd/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                <i class="fab fa-twitter"></i>
+            </a>
+        </li>
+
+        <li class="ml-1 mr-1">
+            <a target="_blank" href="https://facebook.com/sharer.php?u=https://averagelinuxuser.com/kubernetes_containerd/" onclick="window.open(this.href, 'facebook-share', 'width=550,height=435');return false;">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+        </li>
+
+        <li class="ml-1 mr-1">
+            <a target="_blank" href="https://www.linkedin.com/shareArticle?mini=true&url=https://averagelinuxuser.com/kubernetes_containerd/" onclick="window.open(this.href, 'width=550,height=435');return false;">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        </li>
+
+    </ul>
+    
+    <div class="sep">
+    </div>
+    
+</div>
+
+        </div>
+
+        <!-- Post -->
+        
+
+        <div class="col-md-9 flex-first flex-md-unordered">
+            <div class="mainheading">
+
+                <!-- Post Title -->
+                <h1 class="posttitle">Deploy Kubernetes cluster with ContainerD</h1>
+
+            </div>
+
+            <!-- Post Content -->
+            <div class="article-post">
+                <!-- Toc if any -->
+                
+                <!-- End Toc -->
+                <p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/0.kubernetes-overview.jpeg" alt="Kubernetes overview" /></p>
+
+<p><strong>Follow this blog-post, and you will deploy your first Kubernetes cluster with ContainerD. We will use ContainerD instead of Docker because Docker is to be deprecated from Kubernetes. We will build a cluster of one master and two worker nodes, but you can scale it up to more nodes if needed.</strong></p>
+
+<h2 id="content">Content</h2>
+
+<ul id="toc" class="section-nav">
+    <li class="toc-entry toc-h2"><a href="#what-is-kubernetes">What is Kubernetes?</a></li>
+    <li class="toc-entry toc-h2"><a href="#1---create-servers">1 - Create servers</a></li>
+    <li class="toc-entry toc-h2"><a href="#2---configure-servers-for-kubernetes">2 - Configure servers for Kubernetes</a></li>
+    <li class="toc-entry toc-h2"><a href="#3---set-up-master-node">3 - Set up Master node</a></li>
+    <li class="toc-entry toc-h2"><a href="#4---set-up-worker-nodes">4 - Set up Worker nodes</a></li>
+    <li class="toc-entry toc-h2"><a href="#5---deploy-pod-network">5 - Deploy pod network</a></li>
+    <li class="toc-entry toc-h2"><a href="#6---quick-test">6 - Quick test</a></li>
+    <li class="toc-entry toc-h2"><a href="#7---testing-scaling-and-self-healing">7 - Testing Scaling and Self-healing</a></li>
+</ul>
+
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/otMk3WKoqkQ" width="720" height="480" allowfullscreen="">
+  </iframe>
+</div>
+
+<div>
+  <p style="text-align: center;">
+    <a target="_blank" class="btn btn-danger" href="https://www.youtube.com/AverageLinuxUser?sub_confirmation=1">
+      <i class="fab fa-youtube"></i> SUBSCRIBE for more Linux Videos</a>
+  </p>
+</div>
+
+<h2 id="what-is-kubernetes">What is Kubernetes?</h2>
+
+<p>I like how <a href="https://www.redhat.com/en/authors/gordon-haff" target="_blank">Gordon Haff</a>, a technology evangelist at Red Hat, explains Kubernetes:</p>
+
+<blockquote>
+  <p>Kubernetes is an open-source platform that automates Linux container operations. It eliminates many of the manual processes involved in deploying and scaling containerized applications. In other words, you can cluster together groups of hosts running Linux containers, and Kubernetes helps you easily and efficiently manage those clusters.</p>
+</blockquote>
+
+<p>Kubernetes is the most suited for deploying microservices. Unlike a monolithic application where everything is working as a single unified unit, a microservices architecture breaks it down into a collection of smaller independent units that helps avoiding bottlenecks and simplifies scaling. Kubernetes makes it very easy to automate, deploy, scale, and operate large projects built on a microservices architecture.</p>
+
+<p>Kubernetes is used with containers to avoid all the dependency problems. Likely you will see Kubernetes used with Docker as a container runtime interface, but Docker is to be deprecated after Kubernetes v1.20. So, we will use Kubernetes with ContainerD that is a more up-to-date way to run Kubernetes.</p>
+
+<h2 id="what-you-will-learn">What you will learn</h2>
+
+<p>We will create a simple setup of one master node and two worker nodes. But of course, you can use more nodes if needed.</p>
+
+<p>We will install Kubernetes on these machines and make them talk to each other. Kubernetes will act as an orchestrator.</p>
+
+<p>We will deploy an application on this Kubernetes cluster and test some of the key features of Kubernetes, such as</p>
+
+<ul>
+  <li>scaling</li>
+  <li>self-healing</li>
+</ul>
+
+<p>Let’s get started!</p>
+
+<h2 id="1---create-servers">1 - Create servers</h2>
+
+<p>To create our master and worker nodes, we need three servers. You can use any cloud server provider that offers an option to create a network of servers.</p>
+
+<p>I will be using <a href="https://serverspace.io/" rel="sponsored" target="_blank">Serverspace.io</a>, a sponsor of this blog-post. Serverspace offers cloud infrastructure for any digital project including a Kubernetes cluster. It bills you in 10 minutes increments. Hence, you can use a VM for 20 minutes and then delete it, and you will only pay for 20 minutes. Also, no linked credit card is required. So, it is perfect for testing.</p>
+
+<p>Use the <strong>promo code</strong> <code class="language-plaintext highlighter-rouge">AVERAGELINUXUSER</code> to <strong>double up your first payment</strong> at Serverspace:</p>
+
+<p><a class="btn btn-primary" href="https://my.serverspace.io/Account/Manage#Account#PromoCode" target="_blank" rel="sponsored">Try Serverspace!</a></p>
+
+<p>Log in to <strong><em>Serverspace → Settings → Promo code → enter</em> <code class="language-plaintext highlighter-rouge">AVERAGELINUXUSER</code></strong></p>
+
+<p>Let’s create a Serverspace infrastructure for our Kubernetes cluster.</p>
+
+<h3 id="create-a-vmware-public-network">Create a VMware public network</h3>
+
+<p>We will start with creating a public network.</p>
+
+<p><em>Serverspace → VMware Cloud → Networks → Add Network</em></p>
+
+<p><strong>Network type</strong>: Public</p>
+
+<p><strong>Data center</strong>: Amsterdam</p>
+
+<p><strong>Network name</strong>: Kubernetes cluster</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/create-public-network.jpg" alt="Serverspace creating public network for kubernetes" /></p>
+
+<h3 id="create-3-servers">Create 3 servers</h3>
+
+<p>Now, we’ll add servers to this network.</p>
+
+<p><em>Serverspace → VMware Cloud → Servers → Add Server</em></p>
+
+<p><strong>Virtual server template</strong>: Ubuntu 20.04</p>
+
+<p><strong>Server configuration</strong>:</p>
+
+<ul>
+  <li>2 CPUs</li>
+  <li>2GB of RAM</li>
+  <li>10GB of storage</li>
+  <li>Select the newly created <strong><em>Kubernetes cluster</em></strong> as a network</li>
+</ul>
+
+<p><strong>Servers number</strong>: 3</p>
+
+<p><strong>Server names</strong>:</p>
+
+<ul>
+  <li>master</li>
+  <li>worker1</li>
+  <li>worker2</li>
+</ul>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/create-servers.jpg" alt="Serverspace creating servers for kubernetes" /></p>
+
+<p>Finally, click Create to apply the configurations.</p>
+
+<p>After the servers had been created, we can get their login credentials by clicking on them and checking the Status tab:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/server-info.jpg" alt="Serverspace server information panel" /></p>
+
+<p>Furthermore, we can modify the configuration (add more CPU, RAM, storage) of these servers, restart/turn off them from this dashboard, create
+snapshots and enable backups.</p>
+
+<p>Now, log in to each server by using the credentials from the Status panel:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh root@&lt;IP address&gt;
+</code></pre></div></div>
+
+<h3 id="change-hostnames">Change hostnames</h3>
+
+<p>To distinguish these servers, let’s change their hostnames to:</p>
+
+<ul>
+  <li>master</li>
+  <li>worker1</li>
+  <li>worker2</li>
+</ul>
+
+<p>On each server, open the file <code class="language-plaintext highlighter-rouge">/etc/hosts</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo nano /etc/hosts
+</code></pre></div></div>
+
+<p>Add master’s and workers’ IPs, which you can get from the Serverspace control panel.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>45.14.48.178 master
+45.14.48.179 worker1
+45.14.48.180 worker2
+</code></pre></div></div>
+
+<p><em>To remind you, use <kbd>Ctrl</kbd> + <kbd>O</kbd> to write the changes, and <kbd>Ctrl</kbd> + <kbd>X</kbd> to exit nano.</em></p>
+
+<p>We can now use these names instead of typing the IPs.</p>
+
+<p>After that, let’s assign a hostname to each of these servers.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo hostnamectl set-hostname master # On master server
+sudo hostnamectl set-hostname worker1 # On worker1 server
+sudo hostnamectl set-hostname worker2 # On worker2 server
+</code></pre></div></div>
+
+<p>To make the changes take effect, log out and log in on each server.</p>
+
+<p>Now, you should be able to see the server names in your terminal:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/hostnames.jpeg" alt="Hostnames master, worker1, worker2 in terminal" /></p>
+
+<p>This will make it easier to navigate between different servers.</p>
+
+<h2 id="2---configure-servers-for-kubernetes">2 - Configure servers for Kubernetes</h2>
+
+<p>Next, we need to install software and perform the necessary configuration <strong>on each server</strong>.</p>
+
+<h3 id="install-packages">Install packages</h3>
+
+<p>To install Kubernetes and containerd run these commands:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt update
+apt install -y apt-transport-https
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+cat &lt;&lt;EOF &gt;/etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+apt update
+
+apt install -y kubelet kubeadm kubectl containerd
+apt-mark hold kubelet kubeadm kubectl containerd
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">apt-mark hold</code> will prevent the package from being automatically upgraded or removed.</p>
+
+<h3 id="configure-containerd">Configure Containerd</h3>
+
+<p>Load the necessary modules for Containerd:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat &lt;&lt;EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+</code></pre></div></div>
+
+<p>Setup the required kernel parameters:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat &lt;&lt;EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+sudo sysctl --system
+</code></pre></div></div>
+
+<p>Configure containerd:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo mkdir -p /etc/containerd
+containerd config default | sudo tee /etc/containerd/config.toml
+sudo systemctl restart containerd
+</code></pre></div></div>
+
+<h3 id="disable-swap">Disable swap</h3>
+
+<p>Turn swap off:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swapoff -a
+</code></pre></div></div>
+
+<p>And prevents it from turning on after reboots by commenting it in the <code class="language-plaintext highlighter-rouge">/etc/fstab</code> file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nano /etc/fstab # comment swap
+</code></pre></div></div>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/swap_fstab.jpeg" alt="Comment the swap to disable it" /></p>
+
+<h3 id="add-a-regular-user">Add a regular user</h3>
+
+<p>We also need to add regular user because these are newly created servers which only
+has root as user. I will create ALU user and add it to the <strong><code class="language-plaintext highlighter-rouge">sudo</code> group</strong> on each server:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adduser alu
+adduser alu sudo
+</code></pre></div></div>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/add_user.jpeg" alt="Adding a regular user to the server" /></p>
+
+<p>Make sure to check out our article on <a href="/creating-new-user-linux">how to create a new user on
+Linux</a> if you are unfamiliar with the process.</p>
+
+<p>Now, we can log out and log in as a regular user, which is also a requirement to run some of the Kubernetes setup commands.</p>
+
+<p>The servers are ready now. We can start configuring our master node.</p>
+
+<h2 id="3---set-up-master-node">3 - Set up Master node</h2>
+
+<p>We will create a Kubernetes cluster by running the following command on the
+master node:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo kubeadm init
+</code></pre></div></div>
+
+<p>The command takes some time to run (~10 minutes on my end), so after it’s
+done, make sure that you have a similar output to the one on the image below:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/kubeadm-output.jpg" alt="kubeadm command output" /></p>
+
+<p>If you get an error that <code class="language-plaintext highlighter-rouge">kubeadm</code> could not find <code class="language-plaintext highlighter-rouge">containerd</code> automatically,
+specify it as Container Runtime Interface with <code class="language-plaintext highlighter-rouge">--cri-socket</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo kubeadm init --cri-socket /run/containerd/containerd.sock
+</code></pre></div></div>
+
+<p>Now, following the instruction provided in the <code class="language-plaintext highlighter-rouge">kubeadm init</code> output, configure the user to run <code class="language-plaintext highlighter-rouge">kubectl</code> on the master node:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</code></pre></div></div>
+
+<h2 id="4---set-up-worker-nodes">4 - Set up Worker nodes</h2>
+
+<p>Run the command for joining worker nodes. It’s a <strong>last line</strong> in the <code class="language-plaintext highlighter-rouge">kubeadm init</code> output and has the following format:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubeadm join &lt;IP&gt;:&lt;port&gt; --token &lt;TOKEN&gt; --discovery-token-ca-cert-hash &lt;SHA256&gt;
+</code></pre></div></div>
+
+<p>Here is how this command looks in my case:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/kubeadm-join.jpg" alt="kubeadm join command" /></p>
+
+<p>Note, I use <code class="language-plaintext highlighter-rouge">master</code> instead of IP, becuase we specified the IPs earlier in the <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file.</p>
+
+<p>Run this command on each worker node (worker1 &amp; worker2 in our case).</p>
+
+<p>If your <code class="language-plaintext highlighter-rouge">kubeadm</code> doesn’t detect <code class="language-plaintext highlighter-rouge">containerd</code> automatically, specify the
+<code class="language-plaintext highlighter-rouge">containerd</code> socket with <code class="language-plaintext highlighter-rouge">--cri-socket /run/containerd/containerd.sock</code> at the end of <code class="language-plaintext highlighter-rouge">kubeadm join ...</code> command.</p>
+
+<p>After the command finished successfully, it will ask you to run this command on the <strong>master node</strong>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get nodes -o wide
+</code></pre></div></div>
+
+<p>It will verify that nodes are connected. You should find both <code class="language-plaintext highlighter-rouge">worker1</code> and <code class="language-plaintext highlighter-rouge">worker2</code> lister as nodes:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/worker-nodes-connected-to-master.jpg" alt="Kubernetes verifying that worker nodes are connected to
+master" /></p>
+
+<h2 id="5---deploy-pod-network">5 - Deploy pod network</h2>
+
+<p>Now, we need to deploy a pod network to this cluster. We will use the <a href="https://www.projectcalico.org/" target="_blank">Calico network</a>, but Kubernetes offers <a href="https://kubernetes.io/docs/concepts/cluster-administration/addons" target="_blank">other
+options</a> too.</p>
+
+<p>To deploy Calico, run this command on the master node:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+</code></pre></div></div>
+
+<p>And check the status of your nodes:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get nodes -o wide
+</code></pre></div></div>
+
+<p>All nodes should have <strong>STATUS</strong> of <strong>Ready</strong>. It may not show up immediately, so make sure to wait a few minutes for changes to take effect.</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/deploy-pod-network.jpg" alt="Serverspace kubernetes verifying deployment of pod
+network" /></p>
+
+<p>When you see that all nodes are ready, you start testing this Kubernetes cluster.</p>
+
+<h2 id="6---quick-test">6 - Quick test</h2>
+
+<p>The simplest way to test our setup is to create Apache HTTP Server with a pod
+<code class="language-plaintext highlighter-rouge">http-page</code> and expose it via service named <code class="language-plaintext highlighter-rouge">http-service</code> with port 80 and <code class="language-plaintext highlighter-rouge">NodePort</code> type:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl run http-page --image=httpd --port=80
+kubectl expose pod http-page --name=http-service --port=80 --type=NodePort
+</code></pre></div></div>
+
+<p>Verify that it works:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get service http-service
+kubectl get pods http-page -o wide
+</code></pre></div></div>
+
+<p>Get the node name and port from the output of the command above and run this command:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://&lt;NODE NAME&gt;:&lt;PORT&gt;
+</code></pre></div></div>
+
+<p>The output should look like this:</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/quick-test.jpg" alt="Serverspace kubernetes testing nodes by running Apache" /></p>
+
+<p>As the message says, it works!</p>
+
+<h2 id="7---testing-scaling-and-self-healing">7 - Testing Scaling and Self-healing</h2>
+
+<p>To make even more tests, let’s deploy an application, scale it to several replicas and check if Kubernetes will self-heal when one of the replicas breaks.</p>
+
+<h3 id="deployment">Deployment</h3>
+
+<p>Create an <strong>NGINX</strong> deployment:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create deployment nginx-web --image=nginx
+</code></pre></div></div>
+
+<p>Verify that the deployment was successful:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get deployment
+kubectl get pods
+</code></pre></div></div>
+
+<h3 id="scaling">Scaling</h3>
+
+<p>Scale-up this deployment to 2 or more replicas:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl scale --replicas=2 deployment nginx-web
+</code></pre></div></div>
+
+<p>We can check our replicas with these commands:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get deployment -o wide
+kubectl get pods
+</code></pre></div></div>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/scaling-deployment.jpg" alt="Kubernetes scaling deployment by creating 2 replicas" /></p>
+
+<p>We can also see more details about this deployment with the <code class="language-plaintext highlighter-rouge">kubectl describe</code> command:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl describe deployment nginx-web
+</code></pre></div></div>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/describe-command.jpg" alt="Kubernetes describe command output" /></p>
+
+<p>You see that we have two desired replicas and both of them are available now.</p>
+
+<h3 id="self-healing">Self healing</h3>
+
+<p>Now, let’s imagine one of the replicas broke. For example, one of the worker nodes died.</p>
+
+<p>To simulate this, we will kill one of the replicas and see if it is restored by Kubernetes.</p>
+
+<p>Copy the name of one of the pods:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pods
+</code></pre></div></div>
+
+<p>And kill it with the following command:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl delete pod &lt;pod name&gt; &amp;
+</code></pre></div></div>
+
+<p>Check the results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pods
+</code></pre></div></div>
+
+<p>Our pod has been deleted but Kubernetes created a new one (with a little different name) to replace it 
+and our application is running just fine.</p>
+
+<p><img src="/assets/images/posts/2021-03-27-kubernetes_containerd/self-healing.jpg" alt="Serverspace kubernetes self-healing deployment process" /></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Congratulations! You have a working Kuberbetes cluster with ContainerD as a
+runtime interface.</p>
+
+<p>You can now use it for learning purposes or as a foundation for your real
+project. You can scale up by adding more nodes and resources to this setup.</p>
+
+<p>Try
+<strong><a href="https://my.serverspace.io/Account/Manage#Account#PromoCode" rel="sponsored" target="_blank">Serverspace</a></strong>,
+if you are looking for a hosting solution for your Kuberbetes cluster. You will
+be able to <strong>double up your first payment</strong> with the <strong>promo code
+<code class="language-plaintext highlighter-rouge">AVERAGELINUXUSER</code></strong> (<em>Serverspace → Settings → Promo code → enterpromo code</em>).</p>
+
+            </div>
+
+            <!-- Rating -->
+            
+
+            <div class="post-donation">
+                <h3>Please consider supporting this project:</h3><br>
+
+                <a class="btn btn-danger" target="_blank" rel="nofollow" href="https://www.patreon.com/averagelinuxuser"> <i class="fab fa-patreon"></i> Become a patron</a>
+
+                <a class="btn btn-warning" target="_blank" rel="nofollow" href="https://www.buymeacoffee.com/avglinuxuser"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span>Buy me a coffee</span></a>
+
+                <a class="btn btn-dark" target="_blank" rel="nofollow" href="https://www.amazon.com/shop/averagelinuxuser" ><i class="fab fa-amazon"> </i> Shop on Amazon</a>
+
+                <a class="btn btn-info" target="_blank" rel="nofollow" href="https://starlabs.systems/?rfsn=4728988.4df7ed" ><i class="fas fa-laptop"> </i> Buy Linux Laptop</a>
+
+                <a class="btn btn-secondary" href="https://averagelinuxuser.com/the-best-linux-pc-build/" ><i class="fas fa-desktop"> </i> Build Linux PC</a>
+
+                <span style="margin-top: 0.5em; margin-left: 5px;"><i class="fab fa-bitcoin"></i> BTC: <font size="-2">1CfCLTYCqqDfYbngcvQtEav3n7SMZihfSS</font></span>
+            </div>
+
+            <!-- Post Date -->
+            <p>
+            <small>
+                <span class="post-date"><time class="post-date" datetime="2021-03-27">27 Mar 2021</time></span>
+                
+                </small>
+            </p>
+
+            <!-- Author Box -->
+                
+                <div class="row post-top-meta">
+                    <div class="col-xs-12 col-md-3 col-lg-2 text-center text-md-left mb-4 mb-md-0">
+                        
+                        <img class="author-thumb" src="/assets/images/ALU_avatar.png" alt="Average Linux User">
+                        
+                    </div>
+                    <div class="col-xs-12 col-md-9 col-lg-10 text-center text-md-left">
+                        <a target="_blank" class="link-dark" href="http://averagelinuxuser.com">Average Linux User</a><a target="_blank" href="https://twitter.com/AVGLinuxUser" class="btn follow">Follow</a>
+                        <span class="author-description">I am the founder of the Average Linux User project, which is a hobby I work on at night. During the day I am a scientist who uses computers to analyze genetic data.</span>
+                    </div>
+                </div>
+                
+
+            <!-- Post Categories -->
+            <div class="after-post-cats">
+                <ul class="tags mb-4">
+                    
+                    
+                    <li>
+                        <a class="smoothscroll" href="/categories#Linux-Administrator">Linux Administrator</a>
+                    </li>
+                    
+                </ul>
+            </div>
+            <!-- End Categories -->
+
+            <!-- Post Tags -->
+            <div class="after-post-tags">
+                <ul class="tags">
+                    
+                    
+                    <li>
+                        <a class="smoothscroll" href="/tags#ContainerD">#ContainerD</a>
+                    </li>
+                    
+                    <li>
+                        <a class="smoothscroll" href="/tags#Kubernetes">#Kubernetes</a>
+                    </li>
+                    
+                    <li>
+                        <a class="smoothscroll" href="/tags#cluster">#cluster</a>
+                    </li>
+                    
+                    <li>
+                        <a class="smoothscroll" href="/tags#server">#server</a>
+                    </li>
+                    
+                </ul>
+            </div>
+            <!-- End Tags -->
+
+            <!-- Prev/Next -->
+            <div class="row PageNavigation d-flex justify-content-between font-weight-bold">
+            
+            <a class="prev d-block col-md-6" href="/after-installing-opensuse/"> &laquo; 21 Things To Do After Installing OpenSUSE</a>
+            
+            
+            <a class="next d-block col-md-6 text-lg-right" href="/plasma-5-widgets/">Get Maximum of Plasma 5 Widgets! &raquo; </a>
+            
+            <div class="clearfix"></div>
+            </div>
+            <!-- End Categories -->
+
+        </div>
+        <!-- End Post -->
+
+    </div>
+</div>
+<!-- End Article
+================================================== -->
+
+<!-- Begin Comments
+================================================== -->
+
+    <div class="container">
+        <div id="comments" class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <section class="comments" id="comment-section">
+  
+  <!-- Existing comments -->
+  <div class="comments__existing">
+    <h2>Comments</h2>
+    <hr>
+    
+    
+    <!-- List main comments in reverse date order, newest first. List replies in date order, oldest first. -->
+    
+    
+
+<article id="comment-7fc08a70-3b50-11ec-b2d3-ad6f63564125" class="js-comment comment" uid="7fc08a70-3b50-11ec-b2d3-ad6f63564125">
+
+  <div class="comment__avatar-wrapper">
+    <img class="comment__avatar" src="https://www.gravatar.com/avatar/1790ccdecf9f8b9c539fabf2fe8a05bd?s=60&d=identicon&r=g" alt="Richard Chin">
+  </div>
+
+  <div class="comment__content-wrapper">
+    <div class="comment__author">
+      <h3>Richard Chin</h3>
+    </div>
+
+    <div class="comment__date"><a href="#comment-7fc08a70-3b50-11ec-b2d3-ad6f63564125" title="Permalink to this comment">November  1th, 2021 20:15</a></div>
+  </div>
+
+  <div class="comment__body">
+    <p>When I run the curl command.  I get the following error message “curl: (7) Failed to connect to k8s-worker-01 port 32150: Connection refused”.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>When I run this command “kubectl describe pods –all-namespaces</td>
+      <td>grep calico”.  The following is the output.  I am not sure how to fixed this.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Warning  FailedCreatePodSandBox  3m43s                kubelet            Failed to create pod sandbox: rpc error: code = Unknown desc = failed to setup network for sandbox “6b734e9c0269c454a4e93c32b5d293d6b0a2614423a9355f8a113d98327354ff”: stat /var/lib/calico/nodename: no such file or directory: check that the calico/node container is running and has mounted /var/lib/calico/</p>
+
+<p>Thank you for the great post.</p>
+
+  </div>
+
+  <div class="comment__meta">
+    <a rel="nofollow" class="comment__reply-link" onclick="return addComment.moveForm('comment-7fc08a70-3b50-11ec-b2d3-ad6f63564125', 'respond', 'kubernetes_containerd', '7fc08a70-3b50-11ec-b2d3-ad6f63564125')">↪&#xFE0E; Reply to Richard Chin</a>
+  </div>
+</article>
+  
+
+<article id="comment-1e6ef6c0-3b6f-11ec-bbec-15e91a64c63a" class="js-comment comment child" uid="1e6ef6c0-3b6f-11ec-bbec-15e91a64c63a">
+
+  <div class="comment__avatar-wrapper">
+    <img class="comment__avatar" src="https://www.gravatar.com/avatar/1790ccdecf9f8b9c539fabf2fe8a05bd?s=60&d=identicon&r=g" alt="Richard Chin">
+  </div>
+
+  <div class="comment__content-wrapper">
+    <div class="comment__author">
+      <h3>Richard Chin</h3>
+    </div>
+
+    <div class="comment__date"><a href="#comment-1e6ef6c0-3b6f-11ec-bbec-15e91a64c63a" title="Permalink to this comment">November  1th, 2021 23:54</a></div>
+  </div>
+
+  <div class="comment__body">
+    <p>I just figure it out.</p>
+
+  </div>
+
+  <div class="comment__meta">
+    <a rel="nofollow" class="comment__reply-link" onclick="return addComment.moveForm('comment-1e6ef6c0-3b6f-11ec-bbec-15e91a64c63a', 'respond', 'kubernetes_containerd', '1e6ef6c0-3b6f-11ec-bbec-15e91a64c63a')">↪&#xFE0E; Reply to Richard Chin</a>
+  </div>
+</article>
+  
+
+
+
+
+  
+
+
+  <hr style="border-top: 1px solid #ccc; background: transparent; margin-bottom: 10px;">
+
+
+    
+    
+
+<article id="comment-3d41afb0-ab15-11eb-8d80-4b6675dd2108" class="js-comment comment" uid="3d41afb0-ab15-11eb-8d80-4b6675dd2108">
+
+  <div class="comment__avatar-wrapper">
+    <img class="comment__avatar" src="https://www.gravatar.com/avatar/bc5f85e0f2ebfd7321a133190cc8d7b5?s=60&d=identicon&r=g" alt="Ari Prince">
+  </div>
+
+  <div class="comment__content-wrapper">
+    <div class="comment__author">
+      <h3>Ari Prince</h3>
+    </div>
+
+    <div class="comment__date"><a href="#comment-3d41afb0-ab15-11eb-8d80-4b6675dd2108" title="Permalink to this comment">May  2th, 2021 07:08</a></div>
+  </div>
+
+  <div class="comment__body">
+    <p>Hello there, i followed all the steps and it works like a charm.
+By any chance do you have the steps on how to deploy a kubernetes dash-board and how to make it accessible from out side?
+Ive seen many how to but all of them runs on localhost, i even want to try reverse proxy it but maybe there is an easy way.</p>
+
+  </div>
+
+  <div class="comment__meta">
+    <a rel="nofollow" class="comment__reply-link" onclick="return addComment.moveForm('comment-3d41afb0-ab15-11eb-8d80-4b6675dd2108', 'respond', 'kubernetes_containerd', '3d41afb0-ab15-11eb-8d80-4b6675dd2108')">↪&#xFE0E; Reply to Ari Prince</a>
+  </div>
+</article>
+  
+
+
+  <hr style="border-top: 1px solid #ccc; background: transparent; margin-bottom: 10px;">
+
+
+    
+  </div>
+  
+
+  <!-- New comment form -->
+  <div id="respond" class="comment__new">
+    <form class="js-form form" method="post" action="https://staticmanalu.herokuapp.com/v2/entry/avglinux/AverageLinuxUser.com/master/comments">
+  <input type="hidden" name="options[origin]" value="https://averagelinuxuser.com/kubernetes_containerd/">
+  <input type="hidden" name="options[parent]" value="https://averagelinuxuser.com/kubernetes_containerd/">
+  <input type="hidden" id="comment-replying-to-uid" name="fields[replying_to_uid]" value="">
+  <input type="hidden" name="options[slug]" value="kubernetes_containerd">
+  <input type="hidden" name="options[reCaptcha][siteKey]" value="6LcK_QUaAAAAAMVQAFwxBLShIZMHN73eGePQeecW">
+  <input type="hidden" name="options[reCaptcha][secret]"  value="aoYN9+h7f/QRl7Zv12xXNbm/5fFN0Jbu1XYOw82eKruaCFeJqo7sxT9glSixmncftc3VVCNjqcec4gG/7qmqGkTxo8nGP/3NrG6F/oMmp1k5C/6bkAP5Aqs6onckA/rhOgE54lVUJNPKYw9iXtBR2cnUPazVJzXVkY8hzaBSj07dyDJx3ngU5iPLJug+AuZMarf+ePQzR2ot62ouJ23efVHd7iQUqco/IJKN07XblHEnPPBhUAFcrjY3D5qkJxwV2KgU99JED3Ap/k1onxBQnPyecooWOIS5W4DLMesmAWZpR6FFv6/AhLC/cfPdmxh4JPVLZGqG7UQh0bfhPmUc7BKVT/LfOFk3MoQJRPZq6jzXC6CaM+XLqXIoJLVXbNvSTBOCblAXiId5ZGKuU0/Y4LYdG1GtE2Q1e2zkNBPo5Rv5tIVcccppdfCvGMrgnOmU61q26pfumJ/D89yAxW2ANuC6FDXHqjIli/WVyVfGIK90QAXYvb8cRSwfL6TYriw+o/G62W45Fo5PNFc6oCrubAa2kGhzc3cn0kzJtVZaeJkSJsam4SNVAQbgvwhYU8U6sKxPC+Mf51kC1cM0xkFyR8F1CtZSWt1eG4CK07CQf5F/Gohdmr9jdMLpTlcS3MCEOHLYXeRddVZN48oJNIcyOWE2KhO97kf4rJApqTxcMFs=">
+
+  <div class="textfield">
+    <label for="comment-form-message"><h2>Add Comment <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://averagelinuxuser.com/kubernetes_containerd/#respond" style="display:none;">(cancel reply)</a></small></h2>
+      <textarea class="textfield__input" name="fields[message]" type="text" id="comment-form-message" placeholder="Your comment (markdown accepted)" required rows="6"></textarea>
+    </label>
+    <div class="comment-form-message-footnote">
+      Learn how to write in Markdown with this <a rel="nofollow" target="_blank" href="https://kramdown.gettalong.org/quickref.html">Quick Reference</a>.
+    </div>
+  </div>
+
+    <div class="textfield narrowfield">
+      <label for="comment-form-name">Name
+        <input class="textfield__input" name="fields[name]" type="text" id="comment-form-name" placeholder="Your name (required)" required/>
+      </label>
+    </div>
+
+    <div class="textfield narrowfield">
+      <label for="comment-form-email">E-mail
+        <input class="textfield__input" name="fields[email]" type="email" id="comment-form-email" placeholder="Your email (optional)"/>
+      </label>
+    </div>
+    
+    <div class="checkbox-email-notification">
+      <input type="checkbox" name="options[subscribe]" value="email">
+        Notify me of new comments on this post.
+    </div>
+
+    <div class="textfield narrowfield hp">
+      <label for="hp">
+        <input class="textfield__input" name="fields[hp]" id="hp" type="text" placeholder="Leave blank">
+      </label>
+    </div>
+
+    <div id="reCaptcha" class="g-recaptcha" data-sitekey="6LcK_QUaAAAAAMVQAFwxBLShIZMHN73eGePQeecW"></div>
+
+    <button class="button" id="comment-form-submit">Submit</button>
+
+    <div class="comment-form-footnote">
+      * E-mail is used to display <a rel="nofollow" target="_blank" href="https://gravatar.com/">Gravatar</a>.
+    </div>
+</form>
+
+<article class="modal mdl-card mdl-shadow--2dp">
+  <div>
+    <h3 class="modal-title js-modal-title"></h3>
+  </div>
+  <div class="mdl-card__supporting-text js-modal-text"></div>
+  <div class="mdl-card__actions mdl-card--border">
+    <button class="button mdl-button--colored mdl-js-button mdl-js-ripple-effect js-close-modal">Close</button>
+  </div>
+</article>
+
+  </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="/assets/js/staticman.js"></script>
+<script src="https://www.google.com/recaptcha/api.js"></script>
+
+            </div>
+        </div>
+    </div>
+
+<!--End Comments
+================================================== -->
+
+<!-- Review with LD-JSON, adapt it for your needs if you like, but make sure you test the generated HTML source code first:
+https://search.google.com/structured-data/testing-tool/u/0/
+================================================== -->
+
+
+</div>
+
+
+<!-- Bottom Alert Bar
+================================================== -->
+<div class="alertbar">
+	<div class="container text-center">
+		<span><img src="/assets/images/logo.png" alt="Average Linux User"> &nbsp; Never miss a <b>post</b> from us, subscribe to our newsletter</span>
+        <form action="https://AveragelinuxUser.us16.list-manage.com/subscribe/post?u=e5bb7e04d7843029a07f7f054&amp;id=a64e13138e" method="post" name="mc-embedded-subscribe-form" class="wj-contact-form validate" target="_blank" novalidate>
+            <div class="mc-field-group">
+            <input type="email" placeholder="Email" name="EMAIL" class="required email" id="mce-EMAIL" autocomplete="on" required>
+            <input type="submit" value="Subscribe" name="subscribe" class="heart">
+            </div>
+        </form>
+	</div>
+</div>
+
+    
+</div>
+
+<!-- Categories Jumbotron
+================================================== -->
+<div class="jumbotron fortags">
+	<div class="d-md-flex h-100">
+		<div class="col-md-4 transpdark align-self-center text-center h-100">
+            <div class="d-md-flex align-items-center justify-content-center h-100">
+                <h2 class="d-md-block align-self-center py-1 font-weight-light">Explore <span class="d-none d-md-inline">→</span></h2>
+            </div>
+		</div>
+		<div class="col-md-8 p-5 align-self-center text-center">
+            
+            
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-Applications">Linux Applications (44)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Customization">Customization (22)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Desktops">Desktops (23)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Xfce">Xfce (7)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Distros">Distros (31)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Installation-Guide">Installation Guide (8)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-Mint">Linux Mint (9)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Arch-Linux">Arch Linux (13)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Cinnamon">Cinnamon (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Debian">Debian (14)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Things-To-do-After-Install">Things To do After Install (22)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Manjaro">Manjaro (6)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#GNOME">GNOME (8)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Ubuntu">Ubuntu (13)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Plasma-5">Plasma 5 (13)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Review">Review (18)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#KDE-Neon">KDE Neon (5)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-General">Linux General (13)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-Command-Line">Linux Command Line (6)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Desktop-Themes-and-Icons">Desktop Themes and Icons (2)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Budgie">Budgie (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Solus">Solus (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Server">Server (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-Administrator">Linux Administrator (4)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Windows">Windows (2)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-general">Linux general (2)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#elementaryOS">elementaryOS (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Linux-hardware">Linux hardware (2)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Pop!_OS">Pop!_OS (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Kdenlive">Kdenlive (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#MX-Linux">MX Linux (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#XFCE">XFCE (4)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#KDE">KDE (3)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#OBS">OBS (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#SimpleScreenRecorder">SimpleScreenRecorder (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#MATE">MATE (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Tools">Tools (1)</a>
+                
+                    <a class="mt-1 mb-1" href="/categories#Garuda-Linux">Garuda Linux (2)</a>
+                
+            
+            
+		</div>
+	</div>
+</div>
+
+<!-- Begin Footer
+================================================== -->
+<footer class="footer">
+    <div class="container">
+      <div class="footer-svg-icons">
+      
+<a href="https://youtube.com/AverageLinuxUser?sub_confirmation=1" title="Subscribe on YouTube" target="_blank"><i class="svg-icon youtube"></i></a>
+<a href="https://lbry.tv/$/invite/@AVGLinux:2"><img style="vertical-align: top; display: inline-block;" src="/assets/images/lbry.png" title="Watch on LBRY" alt="LBRY.tv"  target="_blank"></a>
+<a href="https://www.facebook.com/AverageLinuxUser" title="Follow on Facebook" target="_blank"><i class="svg-icon facebook"></i></a>
+<a href="https://www.twitter.com/AVGLinuxUser" title="Follow on Twitter" target="_blank"><i class="svg-icon twitter"></i></a>
+
+
+
+
+
+
+<a href="/feed.xml" title="Subscribe to RSS"><i class="svg-icon rss"></i></a>
+
+
+      </div>
+      <div class="row">
+          <div class="disclaimer-privacy" style="margin:0 auto;">
+              <a href="/disclaimer">Disclaimer</a>&nbsp; &nbsp; &nbsp;<a href="/privacy-policy">Privacy Policy</a>
+          </div>
+      </div>
+      <div class="row">    
+          <div class="col-md-6 col-sm-6 text-center text-lg-left">
+              <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a> 
+              Content can be copied and redistributed with the link to the content.
+          </div>
+          
+          <div class="col-md-6 col-sm-6 text-center text-lg-right">    
+              Built with <a target="_blank" href="https://jekyllrb.com/">Jekyll</a> using <a target="_blank" href="https://www.wowthemes.net/mediumish-free-jekyll-template/">Mediumish  Theme</a>
+          </div>
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+</footer>
+<!-- End Footer
+================================================== -->
+
+</div> <!-- /.site-content -->
+
+<!-- Scripts
+================================================== -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+<script src="/assets/js/mediumish.js"></script>
+
+
+<script src="/assets/js/lazyload.js"></script>
+
+
+<script src="/assets/js/ie10-viewport-bug-workaround.js"></script> 
+
+<!-- Start Jekyll Instant Search -->
+<script src="/assets/js/simple-jekyll-search.min.js"></script>
+<script>
+SimpleJekyllSearch({
+  searchInput: document.getElementById('search'),
+  resultsContainer: document.getElementById('results'),
+  searchResultTemplate: '<li><a href="{url}"><p>{title}</p></a></li>',
+  noResultsText: '<li><p>No results found!</p><p>Please, check your search term for typos.</p></li>',
+  json: '/search.json'
+})
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#search').on('blur', function() {
+    $('.search-results').fadeOut('medium');
+    });
+  $('#search').on('focus', function() {
+    $('.search-results').show();
+    });
+  });
+</script>
+<!-- End Jekyll Instant Search -->
+
+<script async src="https://just-comments.com/w2.js"></script> 
+
+</body>
+</html>

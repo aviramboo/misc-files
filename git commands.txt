@@ -1,0 +1,30 @@
+git init             #initialize git on the directory we are in
+git config --global user.email "you@example.com"      #set user email for commit.
+git config --global user.name "you@example.com"      #set user for commit.
+git status           #shows changed files waiting for being staged
+git add file_name    #adding file to staging
+git add .            #add all files in directory to staging
+git rm --cached <file>  #to unstage a file
+git commit -m "message"
+git log                  #show previous commits
+git log --oneline        #showing all commits but every commit is in in 1 line
+checkout commit  <commit>        #check state of code in level of specific commit   (git checkout master to bask to master repo)
+revert commit git config --global user.email "you@example.com"      #set user for commit.           #revert only one commit
+reset commit  git config --global user.email "you@example.com"      #set user for commit. --hard           #reset commits from end to point in time at specific commit(use push after)
+git branch <name>   #create a new branch
+git branch -a       #showing all brancges
+git checkout <branch_name>     #switch to branch
+git branch -d <branch>         #delete a murged branch
+git branch -D <branch>         #delete an unmurged branch
+git checkout -b <branch>       #create new branch and switched to the new
+git merge <branch>             #merge branch with master
+ git push https://github.com/aviramboo/git-bashscripts.git master   #push master branch to github
+git remote add origin https://github.com/aviramboo/git-bashscripts.git  #add origin alias to repo and push it to git hub
+git clone <remote-repo-url>     #clone remote repo to local (need to be in new directory)
+git remote -v                   #showing remote repo's
+git push <remote-repo> <branch>  #push local branch to remote repo
+git remote add 
+
+
+
+
