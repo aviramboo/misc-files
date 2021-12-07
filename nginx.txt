@@ -1,0 +1,30 @@
+#exclude form OS proxy#
+
+ sudo vi /etc/environment
+http_proxy="http://proxy.com:8000"
+no_proxy="127.0.0.1, localhost, *.cnn.com, 192.168.1.10, domain.com:8080"
+
+On CentOS, Fedora or RHEL:
+$ sudo vi /etc/profile.d/proxy.sh
+export http_proxy="http://proxy.com:8000"
+export no_proxy="127.0.0.1, localhost, *.cnn.com, 192.168.1.10, domain.com:8080"
+
+
+
+
+#####configfure URL to answer with or without backslash at the end:########
+
+place the following line under the desired location line:
+
+rewrite ^(.*[^/])$ $1/ permanent;
+
+
+
+##########redirect http to https###################
+
+server {
+    listen      80;
+
+    location / {
+      rewrite     ^(.*)   https://mysite.com$1 permanent;
+    }

@@ -1,0 +1,89 @@
+####################################
+###limit amount of outgoinf mails###
+####################################
+
+transport_maps = regexp:/etc/postfix/transport
+smtp-limit_destination_rate_delay = 12s
+smtp-limit_destination_concurrency_limit = 1
+smtp-limit_destination_recipient_limit = 2
+smtp-limit_initial_destination_concurrency=1
+
+
+###########################
+### edit whitelist file ###
+###########################
+
+edit /etc/postfix/sender_access
+
+example:
+
+myfriend@example.com    OK
+junk@spam.com           REJECT
+marketing@              REJECT
+theboss@                OK
+deals.marketing.com     REJECT
+somedomain.com          OK
+
+then run the following:
+
+postmap /etc/postfix/sender_access
+
+for last restart postfix
+
+
+#######################
+####configure sender in postfix###
+#######################
+http://semi-legitimate.com/blog/item/how-to-rewrite-outgoing-address-in-postfix
+
+
+vi /etc/postfix/main.cf
+ 
+Modify the "mydomain" variable to your email domain
+
+ 
+mydomain = example.com
+ 
+Make sure to uncomment the proper network interface. I'm usually lazy and just do all.
+
+ 
+inet_interfaces = all
+ 
+Now at the bottom of this file you need to specify the generic map file for rewriting the address.
+
+ 
+smtp_generic_maps = hash:/etc/postfix/generic
+ 
+Save and exit main.cf. Now we need to edit /etc/postfix/generic
+
+ 
+vi /etc/postfix/generic
+ 
+You need to specify the mapping of the original address to the one you want. Since in this case I just want to rewrite everything I usually add the following two lines and it seems to catch everything.
+
+ 
+ root@example.com   no-reply@example.com
+ @example.com       no-reply@example.com
+ 
+Save and exit the file. Now we need to create the postfix db.
+
+ 
+postmap /etc/postfix/generic
+ 
+This will create the /etc/postfix/generic.db hash file.
+Now just restart postfix and test.
+
+ 
+/etc/init.d/postfix restart
+ 
+EDIT: umm..so I was doing this on an old version of Red Hat/Postfix 2.0 and my own directions didn't work. (embarrassing...) Turns out you have to use a different file. Instead of using smtp_generic_maps, use sender_canonical_maps like so:
+
+ 
+sender_canonical_maps = hash:/etc/postfix/canonical
+ 
+Then /etc/postfix/canonical is setup just like the generic file example above. Use the
+
+ 
+postmap /etc/postfix/canonical
+ 
+Restart postfix and test.
