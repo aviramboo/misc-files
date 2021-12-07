@@ -1,0 +1,13 @@
+######find all types of supported ciphers by ssh #############
+sshd -T | grep "\(ciphers\|macs\)"
+
+
+
+#######check if ciphers are supported############
+ssh localhost -c arcfour      #arcfour is and example of cipher 
+
+
+#######configure specific sshd ciphers###########
+add to /etc/ssh/sshd_config the following line:
+
+ciphers cipher1,cipher2,etc...

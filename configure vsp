@@ -1,0 +1,71 @@
+* Create newfile --> vsp-dl.conf
+ 
+server {
+    listen       8080;
+    server_name  _;
+ 
+   add_header X-GG-Cache-Status $upstream_cache_status;
+   add_header X-GG-Cache-Date $upstream_http_date;
+   add_header X-GG-Cache-Date $upstream_http_date;
+   access_log  /var/log/nginx/nginx-psa-int.access.log main;
+   error_log  /var/log/nginx/nginx-psa-int.error.log  warn;
+   disable_symlinks off;
+ 
+    location / {
+        root   /mnt;
+        autoindex on;
+    }
+ 
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+
+
+
+•	Create VSP directory and owner user:
+
+groupadd -g 1001 swm
+useradd -u 1001 -g swm swm
+chown swm.swm /mnt/vsp
+
+•	Create stream configuration :
+
+upstream upstream_name-VSP {
+                     server swm-server:8080;
+}
+upstream upstream_name-VSP-API {
+                server swm-server:8090;
+}
+
+•	Create VSP blocks in relevant site section:
+                location ~* /(vsp) {
+                        rewrite /vsp(.*) /vsp11/$1 break;
+                        proxy_pass  http://upstream_name-VSP;
+                        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                        proxy_redirect off;
+                        proxy_buffering off;
+                        proxy_set_header        Host            $http_host;
+                        proxy_set_header        X-Real-IP       $remote_addr;
+                        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header        X-Forwarded-Proto https;
+                        }
+                location ~* /(VAPI) {
+                        rewrite /VAPI/(.*) /$1 break;
+                        proxy_pass http://upstream_name-VSP-API;
+                        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                        proxy_redirect off;
+                        proxy_buffering off;
+                        proxy_set_header        Host            $http_host;
+                        proxy_set_header        X-Real-IP       $remote_addr;
+                        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header        X-Forwarded-Proto https;
+                }
+
+
+Need to mount sharestorage ( both nginx +SWM)
+Nginx: /mnt/VSPs
+SWM: /home/swm/shared/VSPs
+
+
