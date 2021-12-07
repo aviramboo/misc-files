@@ -1,0 +1,205 @@
+###############################
+###configure interface alias###
+###############################
+#
+##debian
+auto eth0
+allow-hotplug eth0
+iface eth0 inet static
+    address 192.168.1.42
+    netmask 255.255.255.0
+    gateway 192.168.1.1
+
+auto eth0:0
+allow-hotplug eth0:0
+iface eth0:0 inet static
+    address 192.168.1.43
+    netmask 255.255.255.0
+
+auto eth0:1
+allow-hotplug eth0:1
+iface eth0:1 inet static
+    address 192.168.1.44
+    netmask 255.255.255.0
+#
+##centos
+DEVICE="eth0"
+HWADDR="00:50:56:8D:32:F3"
+NM_CONTROLLED="yes"
+ONBOOT="yes"
+BOOTPROTO=none
+TYPE=Ethernet
+NETMASK=255.255.252.0
+IPADDR=10.107.1.108
+GATEWAY=10.107.1.254
+
+DEVICE=eth0:1
+BOOTPROTO=none
+#HWADDR=00:15:c5:ee:71:e1
+ONBOOT=yes
+NETMASK=255.255.252.0
+IPADDR=10.107.1.104
+TYPE=Ethernet
+
+#
+##manual
+#
+ifconfig eth0:1 ip netmask ip up/down
+
+
+
+
+******************Ethtools examples********************
+
+############################
+###list device properties###
+############################
+
+ethtool eth0
+
+######################################
+###display ethernet driver settings###
+######################################
+
+ethtool -i eth0
+
+################################
+###display network statistics###
+################################
+
+ethtool -S eth0
+
+#############################################
+###identify specific device with led blink###
+#############################################
+
+ethtool -p eth0
+
+*********************************************************
+mii-tool eth0
+lspci -s 02:05.0 -vv
+
+
+###################
+### add routing ###
+###################
+
+**CentOS
+
+#manual
+route add -net 192.168.19.0 netmask 255.255.255.0 gw 10.107.0.254
+
+#permanent
+create file under interface name for example route-eth0 and follow as example:
+
+ADDRESS0=192.168.19.0
+GATEWAY0=10.107.0.254
+NETMASK0=255.255.255.0
+ADDRESS1=172.20.20.0
+GATEWAY1=10.20.0.254
+NETMASK1=255.255.255.0
+
+**Suze linux
+
+# create file ifroute-eth0 # vi and -eth0 for interface 
+/etc/sysconfig/network # cat ifroute-eth0
+
+10.5.0.0/255.255.255.0 172.17.30.1 - eth0
+
+
+
+################################
+####show network connections####
+################################
+
+ss -r   # show socket connections with host resolution
+
+ss -a   # show all sockets
+
+ss -l   # list listening sockets
+
+iftop -i interface name   # show bandwith usage by hosts pair
+
+tcptrack -i interface_name 
+
+lsof -i :port_number
+
+lsof -i tcp\udp:port_number
+
+grep port_number |grep /etc/service   # show relevant port service
+
+iperf -s       # use specific system as server
+
+####test bandwith and network quality between 2 servers with iperf
+Server side:
+
+#iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 8.00 KByte (default)
+------------------------------------------------------------
+[852] local 10.1.1.1 port 5001 connected with 10.6.2.5 port 54355
+[ ID]   Interval          Transfer        Bandwidth
+[852]   0.0-10.1 sec   1.15 MBytes   956 Kbits/sec
+------------------------------------------------------------
+Client connecting to 10.6.2.5, TCP port 5001
+TCP window size: 8.00 KByte (default)
+------------------------------------------------------------
+[824] local 10.1.1.1 port 1646 connected with 10.6.2.5 port 5001
+[ ID]   Interval          Transfer        Bandwidth
+[824]   0.0-10.0 sec   73.3 MBytes   61.4 Mbits/sec
+Client side
+
+#iperf -c 10.1.1.1 -d
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+------------------------------------------------------------
+Client connecting to 10.1.1.1, TCP port 5001
+TCP window size: 16.0 KByte (default)
+------------------------------------------------------------
+[ 5] local 10.6.2.5 port 60270 connected with 10.1.1.1 port 5001
+[ 4] local 10.6.2.5 port 5001 connected with 10.1.1.1 port 2643
+[ 4] 0.0-10.0 sec 76.3 MBytes 63.9 Mbits/sec
+[ 5] 0.0-10.1 sec 1.55 MBytes 1.29 Mbits/sec
+
+
+
+####test bandwith and network quality between 2 servers with netcat
+Basic usage
+On th server machine
+
+nc -v -v -l -n  2222 &gt;/dev/null
+listening on [any] 2222 ...
+On the client machine
+
+time yes|nc -v -v -n 10.1.1.1 2222 &gt;/dev/null
+On client stop the process  after 10 seconds (more or less) with ctrl-c, you’ll get something like:
+
+sent 87478272, rcvd 0
+ 
+real 0m9.993s
+user 0m2.075s
+sys 0m0.939s
+On the server machine, note the data received (in bytes)
+
+ sent 0, rcvd 87478392
+
+
+########################################
+###find current connections to server###
+########################################
+#for example port 80
+
+watch -n 0.5 "netstat -ano | grep -v unix | grep ESTABLISHED | grep \:80"
+
+#####################################
+##############show my public ip############
+#####################################
+curl ipecho.net/plain
+curl ifconfig.me
+curl icanhazip.com
+curl ipecho.net/plain
+curl ifconfig.co
+

@@ -1,0 +1,187 @@
+###################################
+###search all files for a string###
+###################################
+
+find / -type f -exec grep -l "word" {} +
+find / -type f -print0 | xargs -0 grep -i pattern
+
+
+############################################
+###find all symbolic links on directories###
+############################################
+
+find / -type l -exec ls -l {} \;
+
+
+#######################################
+### serarch file greather then 100M ###
+#######################################
+
+find / -size +100M -exec ls -lah {} \;
+
+############################################
+###find top ip's entering apache log file###
+############################################
+
+awk '{ print $1}' <log_file> | sort  | uniq -c  | sort -nr
+
+#####################################
+####remove old files from directory###
+######################################
+
+
+#search files and remove old files
+find /backup/redmine/db_backup -mtime +7 -type f -exec rm -rf {} \;
+
+#search files and cheange permissions
+find /backup/redmine/db_backup -exec chmod 600 {} \; chown user:group {} \;
+
+
+#######################
+####find with exclude###
+########################
+
+find . -path './media' -prune -o -path './images' -prune -o -path './backups' -prune -o -print
+
+######################################
+###search for a pattern recursively###
+######################################
+
+grep -r "pattern" *
+
+
+##########################################
+####find file with specific permissions###
+##########################################
+
+find /path -name '*.txt' -perm 644
+
+find /path -perm -permision_bits
+
+find . -type f -perm 666
+
+####################################
+###find modified in last 24 hours###
+####################################
+
+find /path -mtime n     #   0 for the last 24 hours
+                        #   1 for the last 48 hours
+                        #   2 for the last 72 hours
+                        
+
+##########################
+###find file with owner###
+##########################
+
+find /path -user root
+
+
+######################################################
+#search in file in directory and replace characters###
+######################################################
+
+#replace in specific directories and sub directories
+#
+find ./ -exec sed -i 's/apple/orange/g' {} \;
+
+#replace in current directory
+#
+sed -i 's/old_link/new_link/g' *
+
+
+####################################
+###find biggest files\directories###
+####################################
+
+#find files over 1G
+find / -type d -size +1G
+
+# find sort and display directories over 10G
+du -h / | grep ^[1-9][0-9][0-9.]*G | sort -rn
+
+##########################
+####   rsync help ########
+##########################
+
+
+###flags:
+                          -z is to enable compression
+		          -v verbose			              
+			  -r indicates recursive
+                          -i show changes betwin source and destination                                                             
+                          -a indicates archive mode:  Recursive mode									                                                  Preserves symbolic links
+	                                              Preserves permissions                                                                                                               Preserves timestamp
+	                                              Preserves owner and group
+                          -u dont overwrite file in destination
+                          --progess  show rsync progress                                                                                                      --include 'P* 
+                          --exclude '*'
+
+##############################################
+###sync two directories in a local computer###
+##############################################
+
+rsync -zva /var/opt/installation/inventory/ /root/temp      
+                                                             							
+###############################
+###Synchronize Only One File###
+###############################
+
+rsync -v /var/lib/rpm/Pubkeys /root/temp/
+
+
+
+####################################
+###create backup with rdiff-backup##
+####################################
+
+#mirror copy without changing permissions
+rdiff-backup --force /path/src /path/dst
+
+#restore from backup to like 10D ago
+rdiff-backup -r 10D /path/src /path/dst
+
+#regular restore
+cp -a /path/dst /path/src
+
+
+##############################################
+### find top 10 largest file or directories###
+##############################################
+
+du -ah / | sort -n -r | head -n 10
+
+
+###################################
+###find file bigger than 1 giga ###
+###################################
+
+find / -size +1G -exec ls -lah {} \;
+
+
+#################################################
+##########sort and filter file###################
+#################################################
+#printing only specific fields to new file and then uniq sorting last field to another file
+
+grep "connected" ds_debug_20151215_10.0.log | awk 'BEGIN { FS = "[, ]" } ; { print $1, $2 , $5}'> orig_file ; cat orig_file |sort -u -t\   -k3 > new_file 
+ 
+
+grep "connected" ds_debug_20151215_10.0.log | cut -d ' ' -f 1,2,5 > orig_file ; cat orig_file |sort -u -t\   -k3 > new_file 
+
+
+####################################
+###files deleted but seems like not deleted#####
+####################################
+#First obtain a list of deleted files which are still held open by applications
+$ /usr/sbin/lsof | grep deleted
+ora    25575 data   33u   REG      65,65  4294983680   31014933 /oradata/DATAPRE/UNDOTBS009.dbf (deleted)
+
+#Truncate File Size
+ $ echo > /proc/pid/fd/fd_number
+
+Example:
+ $ file /proc/25575/fd/33
+    /proc/25575/fd/33: broken symbolic link to `/oradata/DATAPRE/UNDOTBS009.dbf (deleted)'
+    $ echo > /proc/25575/fd/33
+
+https://access.redhat.com/solutions/2316

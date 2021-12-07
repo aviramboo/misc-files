@@ -1,0 +1,27 @@
+create xml file with encrypted login to esx for backup:
+
+
+C:\WINDOWS\system32\windowspowershell\v1.0\powershell.exe -PSConsoleFile "C:\Program Files (x86)\VMware\Infrastructure\vSphere PowerCLI\vim.psc1" -command New-VICredentialStoreItem -Host IP -User root -Password "password" -File D:\pathcredfile.xml
+
+#remove VM disk from live server:
+ot Remove a VMDK
+
+If you want to remove an extra VMDK from a Linux VM,you need to follow these steps.
+
+First you need to unmount the /dev/sdb1:
+
+umount /dev/sdb1
+Remove the /disk2 folder:
+
+rmdir /disk2/
+Remove the entry from the /etc/fstab:
+
+nano or vi /etc/fstab
+
+remove the following line: 
+/dev/sdb1               /disk2                  ext2    defaults        1 2
+Delete the device:
+
+echo 1 > /sys/block/sdb1/device/delete
+
+remove disk from vsphere

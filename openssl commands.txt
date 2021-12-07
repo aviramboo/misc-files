@@ -1,0 +1,44 @@
+##########################
+###generate ssl/csr key###
+##########################
+
+## genarate ssl key and csr without password
+openssl req -nodes -newkey rsa:2048 -keyout domain.key -out domain.csr
+
+##generate new key and csr with password
+openssl genrsa -des3 -out domain.key 2048
+openssl req -new -key domain.key -out domain.csr
+
+###########################
+###renew ssl certificate###
+###########################
+
+openssl req -new -key <server>.key -out <server>.csr
+
+
+#####################
+###decode crt file###
+#####################
+
+openssl x509 -in domain.crt -text -noout
+
+############################################################
+###get certificate and private key from pfx file from iis###
+############################################################
+
+#private key:
+openssl pkcs12 -in keyStore.pfx -out keyStore.pem -nodes -nocerts
+
+#certificate:
+openssl pkcs12 -in keyStore.pfx -out keyStore.crt -nodes -nokeys
+
+###############################################
+###connect to site with specific ssl protoco###
+###############################################
+
+openssl s_client -connect google.com:443 -tls1_2
+
+##############################
+###convert linux ssl format to iis pfx format###
+##############################
+openssl pkcs12 -export -out mydomain.pfx -inkey mydomain.key -in mydomain.crt -certfile intermediateCA.crt

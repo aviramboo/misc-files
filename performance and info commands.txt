@@ -1,0 +1,183 @@
+######################
+###top memory procs###
+######################
+
+ps -auxf | sort -nr -k 4 | head -10
+
+or
+
+ps aux --sort=-%mem | awk 'NR<=10{print $0}'
+
+or
+
+ps axo %mem,pid,cmd,euser | sort -nr | head -n 5
+
+or
+
+
+
+
+###################
+###top cpu procs###
+###################
+
+ps -auxf | sort -nr -k 3 | head -10
+
+
+###################
+####lsof examples###
+####################
+
+lsof -i :25             - Looking for the process listening on port 25
+lsof -i @192.168.1.10   - Searching for active connections
+lsof .u user            - View open files by a specific user
+lsof /bin/vi            - view users using vi
+
+##########
+####top###
+##########
+#dynamic real-time view of a running system
+#
+flags:
+         t	Displays summary information off and on.
+         m      Displays memory information off and on.
+         A	Sorts display by top consumers of system resources.Useful for quick identification of performance-hungry tasks.
+         f      Enters an interactive configuration screen for top. Helpful for setting up top for a specific task.
+         o	Enables you to interactively select the ordering within top.
+         r      Issues renice command.
+         k      Issues kill command.
+         z      Turn on or off color/mono   
+
+#############
+####vmstat###
+#############
+#reports information about processes, memory, paging, block IO, traps, and cpu activity
+
+vmstat 3
+
+vmstat -m                 -Display Memory Utilization Slabinfo
+vmstat -a                 -Get Information About Active / Inactive Memory Pages
+
+############
+###mpstat###
+############
+ 
+mpstat -P ALL             -Multiprocessor Usage
+
+
+
+##########
+###pmap###
+##########
+
+pmap -d PID                -The command pmap report memory map of a process
+
+
+
+############
+###strace###
+############
+
+#Run strace against /bin/foo and capture output to a text file in output.txt
+    strace -o output.txt /bin/foo 
+
+#strace the webserver process and see what it's doing. example: strace php5 fastcgi process
+    strace -p 22254 -s 80 -o /tmp/debug.lighttpd.txt      
+
+#To see only a trace of the open, read system calls
+    strace -e trace=open,read -p 22254 -s 80 -o debug.webserver.txt
+
+
+########################
+###http generate load###
+########################
+
+ab -n 10 -c 2 http://www.somewhere.com/         ##  send 1000 requests to server to perform for the benchmarking session
+                                                ##  concurrency number i.e. ab will send 5 multiple requests to perform at a time to server
+
+##########################
+### clear cache memory ###
+##########################
+* To free pagecache:
+
+    sync; echo 1 > /proc/sys/vm/drop_caches
+
+* To free dentries and inodes:
+
+    sync;  echo 2 > /proc/sys/vm/drop_caches
+
+* To free pagecache, dentries and inodes:
+
+    sync; echo 3 > /proc/sys/vm/drop_caches
+
+
+*clear swap
+
+swapoff
+swapon
+
+
+
+#########################
+###show hardware specs###
+#########################
+
+lshw -class disk             #show only disk info
+
+lshw -short                  #Generate Compact Hardware Report
+
+####################
+###show proc info###
+####################
+
+cat /proc/object        # object can be cpuinfo,meminfo,etc...
+
+
+##############################
+###show os version and type###
+##############################
+
+cat /etc/issue
+
+###################################
+###limit apache system resources###
+###################################
+
+#This applies to processes forked off from Apache children servicing requests, not the Apache children themselves. This includes CGI scripts and SSI exec commands, but not any processes forked off from the Apache parent such as piped logs.
+
+example  20 to 30 CPU seconds; 3 Megs of memory, and 4 to 8 processes for a single user:
+
+RLimitCPU 20 30
+RLimitMEM 3000000
+RLimitNPROC 4 8
+
+
+##########################################################
+###script to reboot or start service if memory consumed###
+##########################################################
+
+#!/bin/bash
+
+mem=$(free -m | awk '/Mem:/{print $4}')
+
+(( mem <= 100 )) && reboot
+
+
+
+#########################################
+###out of memory and swap- oom killer ###
+#########################################
+
+##not permanent (will not apply on reboot)
+
+echo 2 > /proc/sys/vm/overcommit_memory
+echo 80 > /proc/sys/vm/overcommit_ratio
+
+
+##permanent (only applied after reboot)
+
+-change values on /etc/sysctl.conf
+
+vm.overcommit_memory = 2
+
+vm.overcommit_ratio = 80

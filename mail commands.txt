@@ -1,0 +1,149 @@
+###################
+###test sendmail###
+###################
+
+#with sendmail
+echo "This is a test" | /usr/sbin/sendmail -fapache@maod.co.il aviram1981@walla.co.il
+
+#with mutt
+ export EMAIL=chrysler-prod@redbend.com && echo "Log file does not exist" | mutt -s "SUBJECT TEST"  -- aviram.boxbaum@redbend.com
+
+
+#with mail
+echo "test"  |    mail -s "test"  aviram.boxbaum@harman.com
+
+
+############################
+###send email with telnet###
+############################
+#
+#
+*****Connecting to the host******
+
+With this in mind it's very easy to send a basic text email just using telnet which is installed on most computers. First open up a terminal and type the following, of course replacing mail.yourserver.dk with the address of your SMTP server:
+telnet mail.yoursever.dk 25
+
+
+*******This should return something like:******
+telnet mail.yoursever.dk 25 Trying 172.16.0.2... Connected to mail.yoursever.dk (172.16.0.2). Escape character is '^]'. 220 cirkeline.yoursever.dk ESMTP Postfix (Debian/GNU) 
+
+
+*****HELLO command******
+
+Next we need to introduce ourselves using the helo command, in reality this can be anything and the mail will still be sent OK (although a false helo command will result in a spam score from spamassasin for example).
+helo mail.localhost 250 mail.yoursever.dk 
+
+
+******MAIL FROM command******
+
+Next we type mail from: followed by your email address, if you use a name as well then you need to put angle brackets around you address, like Bob Peers <email@domain.dk>, but the name is not necessary
+mail from:me@domain.dk 250 Ok 
+
+
+******RCPT TO command*******
+
+Now type rcpt to: followed by who you are sending the mail to, following the same rules as above. Note that this IS NOT the address that appears on the To: line in your email client or webmail, the two are completely unrelated which is why you can receive spam when your email address is not listed on the To: line.
+rcpt to:you@domain.com 250 Ok 
+
+
+
+*******DATA command********
+
+Now for the actual mail body, type the word 'data' and press enter:
+data 354 End data with <CR><LF>.<CR><LF> 
+Your SMTP server might not display the extra help here but it simply means that we type our mail body now and to end the input press enter then type a single . followed by pressing enter again. At this point we can add extra headers if we wish but they are not required. This just shows that the To and From fields are just part of the message body and have nothing to do with the delivery of the email. However if you do not add them then the message will arrive with 'To: undisclosed-recipients:; in the To field, which again will probably cause your message to be assigned a spam score. If you do decide to add these extra headers make sure you leave a blank line between them and the 'real' text you wish to appear in the body of the message.
+to:Joe Bloggs<you@domain.com> from: Bob Peers<me@domain.dk> subject:Telnet test  Hope you are following along OK... . 250 Ok: queued as 4DDFB180CDA 
+To actually send the mail we need to quit the telnet session by typing 'quit'.
+quit 221 Bye Connection closed by foreign host. 
+
+
+
+******Summary*********
+
+If all goes well you should get the email without problems, that's basically all there is to it. Many of the extra lines are not really required, as long as you type the 'helo', 'mail from:' and 'rcpt to:' commands along with 'data', terminating '.' and 'quit' the mail should be sent.
+
+
+
+******Relay access denied error*********
+
+If you try to send an email to an external address when you are not permitted you will get some output like below (this is using my Fastmail account).
+telnet mail.messagingengine.com 25 Trying 66.111.4.160... Connected to mail.messagingengine.com (66.111.4.160). Escape character is '^]'. 220 frontend2.messagingengine.com ESMTP . No UCE permitted. helo mail.localhost 250 frontend2.messagingengine.com mail from:someone@somewhere.dk 250 Ok rcpt to:someoneelse@hotmail.com 554 <someoneelse@hotmail.com>: Relay access denied quit 221 Bye Connection closed by foreign host.
+
+
+
+
+##########################################
+### configure sendmail with smart host ###
+##########################################
+
+
+**add this line to sendmail.mc:
+
+define(`SMART_HOST', `server')  # if needed server ip and not name without name resolution rap the ip with [server-ip]
+
+
+**if not working try the following:
+
+Add FEATURE(`mailertable') to your sendmail.mc file. 
+Create your /etc/mail/mailertable file   - example "bresnan.net       esmtp:[69.145.248.18]"
+Create a mapfile: makemap hash /etc/mail/mailertable.db < /etc/mail/mailertable
+Rebuild your configs make -C /etc/mail
+Restart sendmail: service sendmail restart
+
+
+****************
+define(`SMART_HOST', `relay.dnsexit.com')  
+FEATURE(`access_db')
+  
+3. Update sendmail.cf and access.db files:   
+
+# cd /etc/mail  
+# m4 sendmail.mc >sendmail.cf  
+# makemap hash access <access 
+
+
+#################################
+###sendmail reject sender out ###
+#################################
+
+enable access.db option:
+
+add the following to sendmail.cf:
+
+FEATURE(`access_db')
+
+add the following to sendmail.mc:
+
+FEATURE(`access_db', `hash -T<TMPF> -o /etc/mail/access.db')dnl
+
+add sender line to /etc/mail/access :
+
+From:user@example.com      REJECT
+
+update access.db:
+
+makemap hash access.db < access
+
+##################################
+###configure sender in sendmail###
+##################################
+Sendmail masquerading configuration
+Open your sendmail config file /etc/mail/sendmail.mc:
+# vi /etc/mail/sendmail.mc
+
+Append/add/modify the lines as follows:
+MASQUERADE_AS(cyberciti.biz)dnl
+FEATURE(masquerade_envelope)dnl
+FEATURE(masquerade_entire_domain)dnl
+MASQUERADE_DOMAIN(cyberciti.biz)dnl
+
+Save and close the file. Replace domain name cyberciti.biz with your actual domain name. Update and restat sendmail server:
+# m4 /etc/mail/sendmail.mc > /etc/mail/sendmail.cf
+# /etc/init.d/sendmail restart
+
+
+#############################
+###postfix smart host###
+#############################
+postconf -e 'relayhost = smtp.example.com'
+

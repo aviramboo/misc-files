@@ -1,0 +1,11 @@
+#### windows server with 2 nic and 2 gateway with no internet access:
+
+
+Now you need to add the IP addresses of the NICs you don't want traffic to go out from using the netsh command.
+netsh int ipv4 add address "Local Area Connection" 1.2.3.4/24 SkipAsSource=true
+   
+?Obviously the IP address and netmask should reflect the IP and netmask of the NICs you don't want traffic to flow from.
+The SkipAsSource flag does two thing, first it tells Windows not to use that IP as the source address and second it prevents dynamic registration of the address in DNS.
+   
+To view the status of an IP and its SkipAsSource settings use the following netsh command.
+netsh int ipv4 show ipaddresses level=verbose

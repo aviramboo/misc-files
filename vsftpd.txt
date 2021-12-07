@@ -1,0 +1,7 @@
+fix timeout error:
+
+Open Filezilla, go to Edit -> Settings
+Click on Connection -> FTP: Choose Active
+Click on Connection -> FTP -> Active Mode: Select "Ask your operating system for the external IP address"
+Click on Connection -> FTP -> Passive Mode: Choose Fall Back to Active Mode
+Press OK.

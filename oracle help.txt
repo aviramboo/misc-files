@@ -1,0 +1,104 @@
+./runInstaller -silent -responsefile afile.txt
+
+su - oracle
+ps -ef|grep pmon
+sqlplus / as sysdba
+ps -ef|grep LOCAL=|wc                                                #show number of processes
+select count(*) ,  MACHINE  from v$session group by  MACHINE ;       #show connected machines
+/                                                                    #run last command
+
+
+SELECT INSTANCE_NAME, STATUS, DATABASE_STATUS FROM V$INSTANCE;       #show service/instance status
+lsnrctl status                                                       #show listener status
+
+
+
+select count(*) from v$session ;                                     #show total connections
+
+
+
+
+LOCK / UNLOCK TABLE
+
+Let’s assume that 'EMP' table is locked,
+
+SELECT object_id FROM dba_objects WHERE object_name='EMP';
+ OBJECT_ID
+----------
+   7401242
+
+If there are no locks present for the table 'EMP' this query won’t return any values.
+
+SELECT sid FROM v$lock WHERE id1=7401242
+SID
+----------
+   3434
+
+
+SELECT sid, serial# from v$session where sid=3434
+
+       SID    SERIAL#
+
+---------- ----------
+
+      3434      92193
+
+
+ALTER SYSTEM KILL SESSION '3434,92193' ;
+
+
+
+
+
+
+
+
+
+SELECT SUM(BYTES)/1024/1024 "MB" FROM DBA_SEGMENTS WHERE OWNER='SMA_DEF_SH_SEC';            #show tschema size
+
+
+
+
+select * from (select tablespace_name, sum(round(bytes/1024/1024,0)) current_size_MB,  SUM(round(maxbytes/1024/1024,0)) max_size_MB,  SUM(round(maxbytes/1024/1024,0)) - sum(round(bytes/1024/1024,0)) FREE_SIZE_MB, ROUND(sum(round(bytes/1024/1024,0))/decode(sum(round(maxbytes/1024/1024,0)),0,sum(round(bytes/1024/1024,0)),sum(round(maxbytes/1024/1024,0)))*100,0) PERCENT_USED from dba_data_files  group by tablespace_name ) a where a.tablespace_name='SMA_DEF_SH_SEC';
+
+
+
+###shutdown oracle ###
+1. sqlplus / as sysdba
+2. alter system checkpoint global;
+3. shutdown immediate
+4.  lsnrctl stop
+
+
+###configure archive mode for backup#####
+
+alter system set log_archive_dest_1='location=/home/oracle/arch' scope=both;
+shutdown immediate;
+startup mount;
+alter database archivelog;
+alter database open;
+
+
+archive log list;
+
+
+#######################configure oracle to startup################
+
+edit the file /etc/oratab and set lines as example path:
+
+OMADM:/app/oracle/product/12.1.0/db_1:Y          MADM-instance name:Path
+
+
+################reset/change user pass expiration###########
+
+
+1.	 ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
+2.	Alter user <username_from_list> identified by <password>;
+Other users we will check today together.
+
+
+
+###############check if database is in backup mode###########
+select * from v$backup;
+
+
